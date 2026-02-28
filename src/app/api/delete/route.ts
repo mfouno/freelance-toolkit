@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { createClient } from "@supabase/supabase-js";
+import { unstable_noStore as noStore } from "next/cache";
 
 export async function POST(req: NextRequest) {
+    noStore();
     try {
         const body = await req.json();
         const path = body.path;
@@ -16,8 +18,14 @@ export async function POST(req: NextRequest) {
             storagePath = decodeURIComponent(storagePath.split('/api/files?path=')[1]);
         }
 
+        const sb = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            { auth: { autoRefreshToken: false, persistSession: false } }
+        );
+
         // Delete the file using the service role key
-        const { error } = await supabaseAdmin
+        const { error } = await sb
             .storage
             .from('receipts')
             .remove([storagePath]);

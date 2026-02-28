@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { createClient } from "@supabase/supabase-js";
+import { unstable_noStore as noStore } from "next/cache";
 
 export async function GET(req: NextRequest) {
+    noStore();
     const { searchParams } = new URL(req.url);
     const path = searchParams.get("path");
 
@@ -10,8 +12,14 @@ export async function GET(req: NextRequest) {
     }
 
     try {
+        const sb = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            { auth: { autoRefreshToken: false, persistSession: false } }
+        );
+
         // Download the file privately using the service role key and bypasses RLS
-        const { data, error } = await supabaseAdmin
+        const { data, error } = await sb
             .storage
             .from('receipts')
             .download(path);

@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { createClient } from "@supabase/supabase-js";
+import { unstable_noStore as noStore } from "next/cache";
 
 export async function POST(req: NextRequest) {
+    noStore();
     try {
         const formData = await req.formData();
         const file = formData.get("file") as File;
@@ -25,7 +27,13 @@ export async function POST(req: NextRequest) {
         // Format path: "YYYY-MM/Category/timestamp-name.ext"
         const filePath = `${month}/${safeCategory}/${filename}`;
 
-        const { data, error } = await supabaseAdmin
+        const sb = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            { auth: { autoRefreshToken: false, persistSession: false } }
+        );
+
+        const { data, error } = await sb
             .storage
             .from('receipts') // Must match the Private Bucket name created in Supabase
             .upload(filePath, buffer, {
