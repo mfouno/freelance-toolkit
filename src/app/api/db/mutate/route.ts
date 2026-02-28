@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(req: Request) {
+    let table = ''; let payload: any = {}; let action = '';
     try {
-        const { table, action, payload } = await req.json();
+        ({ table, action, payload } = await req.json());
 
         // Very generic mutation handler using the Service Role to bypass RLS.
         // The payload keys must map exactly to DB column names.
@@ -17,7 +18,7 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ success: true });
     } catch (error: any) {
-        console.error("Mutate Error:", error);
+        console.error("Mutate Error:", table, action, JSON.stringify(payload), error);
         return NextResponse.json({ error: error.message || 'Erreur mutation server' }, { status: 500 });
     }
 }
