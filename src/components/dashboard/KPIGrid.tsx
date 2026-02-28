@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Euro, PiggyBank, Receipt, Briefcase, Activity, ChevronLeft, ChevronRight } from "lucide-react";
 
 export function KPIGrid() {
-    const { workDays, expenses, settings, salaries = {}, paidRevenues = {} } = useAppStore();
+    const { workDays, expenses, settings, salaries = {}, paidRevenues = {}, oneOffRevenues = {}, annualCharges = [] } = useAppStore();
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
     // Filtrage des données par année
@@ -32,6 +32,11 @@ export function KPIGrid() {
             paid += paidRevenues[monthPrefix];
         }
 
+        // CA facturé ponctuel du mois (on l'ajoute au CA facturé total)
+        if (oneOffRevenues[monthPrefix]) {
+            revenue += oneOffRevenues[monthPrefix];
+        }
+
         return { month: monthName, revenue, paid };
     });
 
@@ -47,6 +52,13 @@ export function KPIGrid() {
         .filter(e => e.date.startsWith(yearStr))
         .reduce((sum, e) => sum + e.amountHt, 0);
 
+    // Charges annuelles récurrentes pour cette année
+    const totalAnnualChargesHt = annualCharges
+        .filter(c => c.year === selectedYear)
+        .reduce((sum, c) => sum + c.amountHt, 0);
+
+    const totalChargesHt = totalExpensesHt + totalAnnualChargesHt;
+
     // Filtrer les salaires par année
     const totalSalariesBrut = Object.entries(salaries)
         .filter(([monthStr]) => monthStr.startsWith(yearStr))
@@ -57,14 +69,14 @@ export function KPIGrid() {
     const impots = totalSalariesBrut * (settings.incomeTaxRate / 100);
     const salaireNetApresImpot = totalSalariesBrut - cotisations - impots;
 
-    const tresorerieRestante = totalPaidRevenuesHt - totalExpensesHt - totalSalariesBrut;
+    const tresorerieRestante = totalPaidRevenuesHt - totalChargesHt - totalSalariesBrut;
 
     const formatEuro = (val: number) => {
         return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
     };
 
     const formatK = (val: number) => {
-        if (val === 0) return "";
+        if (val === 0) return "0";
         if (val < 1000) return val.toString();
         // Exemple: 12500 -> 12,5k
         return (val / 1000).toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 1 }) + 'k';
@@ -72,10 +84,10 @@ export function KPIGrid() {
 
     const flatTax = tresorerieRestante > 0 ? tresorerieRestante * 0.30 : 0;
     const tresorerieNet = tresorerieRestante > 0 ? tresorerieRestante * 0.70 : 0;
-    const distributionTotal = Math.max(totalExpensesHt + cotisations + impots + flatTax + tresorerieNet + salaireNetApresImpot, 1);
+    const distributionTotal = Math.max(totalChargesHt + cotisations + impots + flatTax + tresorerieNet + salaireNetApresImpot, 1);
 
     const distData = [
-        { label: "Charges", value: totalExpensesHt, color: "bg-orange-400" },
+        { label: "Charges", value: totalChargesHt, color: "bg-orange-400" },
         { label: "Cotis.", value: cotisations, color: "bg-orange-500" },
         { label: "IR", value: impots, color: "bg-red-400" },
         { label: "Flat Tax", value: flatTax, color: "bg-red-500" },
@@ -101,10 +113,10 @@ export function KPIGrid() {
             {/* Section CA Facturé (Annuel + Graphique Mensuel) */}
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">CA Facturé HT</CardTitle>
+                    <CardTitle className="text-sm font-medium">CA Facturé HT (Jours + Ponctuel)</CardTitle>
+                    <div className="text-2xl font-bold text-blue-600">{formatEuro(totalRevenueHt)}</div>
                 </CardHeader>
                 <CardContent className="pt-4 px-2 md:px-6">
-                    <div className="text-3xl font-bold mb-4 text-blue-600">{formatEuro(totalRevenueHt)}</div>
                     {/* Graphique à barres CSS */}
                     <div className="flex items-end h-36 gap-1.5 md:gap-3 mt-2">
                         {monthlyData.map(d => (
@@ -128,9 +140,9 @@ export function KPIGrid() {
             <Card className="col-span-1 bg-primary text-primary-foreground">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">CA Encaissé HT</CardTitle>
+                    <div className="text-2xl font-bold">{formatEuro(totalPaidRevenuesHt)}</div>
                 </CardHeader>
                 <CardContent className="pt-4 px-2 md:px-6">
-                    <div className="text-3xl font-bold mb-4">{formatEuro(totalPaidRevenuesHt)}</div>
                     {/* Graphique à barres CSS */}
                     <div className="flex items-end h-36 gap-1.5 md:gap-3 mt-2">
                         {monthlyData.map(d => (
@@ -139,11 +151,11 @@ export function KPIGrid() {
                                     className="bg-emerald-600 w-full rounded-t-sm relative shadow-[0_0_10px_rgba(5,150,105,0.3)]"
                                     style={{ height: `${(d.paid / maxRevenue) * 100}%`, minHeight: '4px' }}
                                 >
-                                    <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] md:text-[10px] font-medium text-emerald-100/70 whitespace-nowrap">
+                                    <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] md:text-[10px] font-semibold text-emerald-200 whitespace-nowrap">
                                         {formatK(d.paid)}
                                     </span>
                                 </div>
-                                <div className="text-[9px] md:text-[11px] text-emerald-100/80 mt-2 font-medium">{d.month}</div>
+                                <div className="text-[9px] md:text-[11px] text-emerald-200 mt-2 font-semibold">{d.month}</div>
                             </div>
                         ))}
                     </div>
@@ -158,7 +170,7 @@ export function KPIGrid() {
                         <Receipt className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent className="flex flex-col items-center text-center">
-                        <div className="text-2xl font-bold text-orange-500 dark:text-orange-400">{formatEuro(totalExpensesHt)}</div>
+                        <div className="text-2xl font-bold text-orange-500 dark:text-orange-400">{formatEuro(totalChargesHt)}</div>
                     </CardContent>
                 </Card>
 

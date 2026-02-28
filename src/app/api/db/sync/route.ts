@@ -11,14 +11,18 @@ export async function GET() {
             expensesRes,
             settingsRes,
             salariesRes,
-            paidRevenuesRes
+            paidRevenuesRes,
+            oneOffRevenuesRes,
+            annualChargesRes
         ] = await Promise.all([
             supabaseAdmin.from('clients').select('*'),
             supabaseAdmin.from('work_days').select('*'),
             supabaseAdmin.from('expenses').select('*'),
             supabaseAdmin.from('settings').select('*').eq('id', 1).maybeSingle(),
             supabaseAdmin.from('salaries').select('*'),
-            supabaseAdmin.from('paid_revenues').select('*')
+            supabaseAdmin.from('paid_revenues').select('*'),
+            supabaseAdmin.from('one_off_revenues').select('*'),
+            supabaseAdmin.from('annual_charges').select('*')
         ]);
 
         const workDays = workDaysRes.data?.reduce((acc, wd) => {
@@ -33,6 +37,11 @@ export async function GET() {
 
         const paidRevenues = paidRevenuesRes.data?.reduce((acc, pr) => {
             acc[pr.month_str] = pr.amount;
+            return acc;
+        }, {} as Record<string, any>) || {};
+
+        const oneOffRevenues = oneOffRevenuesRes.data?.reduce((acc, or) => {
+            acc[or.month_str] = or.amount;
             return acc;
         }, {} as Record<string, any>) || {};
 
@@ -51,8 +60,12 @@ export async function GET() {
             incomeTaxRate: settingsRes.data?.income_tax_rate || 11
         };
 
+        const annualCharges = annualChargesRes.data?.map(c => ({
+            id: c.id, label: c.label, amountHt: c.amount_ht, year: c.year, documentUrl: c.document_url
+        })) || [];
+
         return NextResponse.json({
-            clients, workDays, expenses, settings, salaries, paidRevenues
+            clients, workDays, expenses, settings, salaries, paidRevenues, oneOffRevenues, annualCharges
         });
     } catch (error) {
         console.error("Erreur sync:", error);

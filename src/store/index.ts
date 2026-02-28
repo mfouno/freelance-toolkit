@@ -25,6 +25,8 @@ export const useAppStore = create<AppState>()(
         },
         salaries: {},
         paidRevenues: {},
+        oneOffRevenues: {},
+        annualCharges: [],
 
         initStore: async () => {
             try {
@@ -37,7 +39,9 @@ export const useAppStore = create<AppState>()(
                         expenses: data.expenses || [],
                         settings: data.settings || { socialContributionRate: 45, incomeTaxRate: 11 },
                         salaries: data.salaries || {},
-                        paidRevenues: data.paidRevenues || {}
+                        paidRevenues: data.paidRevenues || {},
+                        oneOffRevenues: data.oneOffRevenues || {},
+                        annualCharges: data.annualCharges || []
                     });
                 }
             } catch (error) {
@@ -148,6 +152,28 @@ export const useAppStore = create<AppState>()(
                     [monthStr]: amount,
                 }
             }));
+        },
+
+        // ONE-OFF REVENUES
+        setOneOffRevenue: (monthStr, amount) => {
+            mutateDB('one_off_revenues', 'upsert', { month_str: monthStr, amount });
+            set((state) => ({
+                oneOffRevenues: {
+                    ...state.oneOffRevenues,
+                    [monthStr]: amount,
+                }
+            }));
+        },
+
+        // ANNUAL CHARGES
+        addAnnualCharge: (charge) => {
+            mutateDB('annual_charges', 'upsert', { id: charge.id, label: charge.label, amount_ht: charge.amountHt, year: charge.year, document_url: charge.documentUrl || null });
+            set((state) => ({ annualCharges: [...state.annualCharges, charge] }));
+        },
+
+        deleteAnnualCharge: (id) => {
+            mutateDB('annual_charges', 'delete', { id });
+            set((state) => ({ annualCharges: state.annualCharges.filter(c => c.id !== id) }));
         },
     })
 );

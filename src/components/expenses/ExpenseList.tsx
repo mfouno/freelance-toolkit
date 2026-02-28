@@ -7,7 +7,7 @@ import { Trash2, ReceiptText, Calendar, ChevronDown, ChevronRight, Folder, FileT
 import { Expense } from "@/store/types";
 
 export function ExpenseList() {
-    const { expenses, deleteExpense } = useAppStore();
+    const { expenses, deleteExpense, annualCharges = [] } = useAppStore();
 
     // State to track which months/categories are expanded
     const [expandedMonths, setExpandedMonths] = useState<Record<string, boolean>>({});
@@ -27,28 +27,47 @@ export function ExpenseList() {
     };
 
     const formatMonth = (monthStr: string) => {
+        if (monthStr.length === 4) {
+            return `Charges annuelles ${monthStr}`;
+        }
         const [year, month] = monthStr.split('-');
         const date = new Date(parseInt(year), parseInt(month) - 1, 1);
         return date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
     };
 
-    if (expenses.length === 0) {
+    if (expenses.length === 0 && annualCharges.length === 0) {
         return (
             <Card className="border shadow-sm border-dashed">
                 <CardContent className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
                     <ReceiptText className="h-12 w-12 mb-3 opacity-20" />
-                    <p className="text-sm font-medium">Aucune dépense enregistrée</p>
-                    <p className="text-xs mt-1">Vos tickets scannés apparaîtront ici.</p>
+                    <p className="text-sm font-medium">Aucune charge enregistrée</p>
+                    <p className="text-xs mt-1">Vos tickets scannés et charges annuelles apparaîtront ici.</p>
                 </CardContent>
             </Card>
         );
     }
 
+    // Convertir les charges annuelles en "faux" expenses pour les intégrer à l'historique
+    const annualAsExpenses: Expense[] = annualCharges.map(charge => ({
+        id: `annual-${charge.id}`,
+        date: `${charge.year}-01-01`,
+        description: charge.label,
+        amountHt: charge.amountHt,
+        tva: 0,
+        category: "Charges Annuelles" as any,
+        receiptUrl: charge.documentUrl,
+    }));
+
+    const allExpenses = [...expenses, ...annualAsExpenses];
+
     // Grouping Logic
     // 1. Group by Month (YYYY-MM)
     const groupedByMonth: Record<string, Expense[]> = {};
-    expenses.forEach(exp => {
-        const monthKey = exp.date.substring(0, 7); // extract "YYYY-MM"
+    allExpenses.forEach(exp => {
+        // Pour les charges annuelles, grouper par année
+        const monthKey = exp.category === "Charges Annuelles" as any
+            ? exp.date.substring(0, 4) // "YYYY" pour regrouper les charges annuelles
+            : exp.date.substring(0, 7); // "YYYY-MM" pour les dépenses classiques
         if (!groupedByMonth[monthKey]) groupedByMonth[monthKey] = [];
         groupedByMonth[monthKey].push(exp);
     });
@@ -68,9 +87,9 @@ export function ExpenseList() {
         <Card className="border shadow-md">
             <CardHeader className="pb-4">
                 <CardTitle className="text-lg flex items-center justify-between">
-                    Historique des Dépenses
+                    Historique des Charges
                     <span className="bg-primary/10 text-primary text-xs px-2.5 py-0.5 rounded-full font-semibold">
-                        {expenses.length}
+                        {allExpenses.length}
                     </span>
                 </CardTitle>
                 <CardDescription>Consultez la décomposition de vos charges par mois et par catégorie.</CardDescription>
@@ -109,7 +128,7 @@ export function ExpenseList() {
                                         <span className="text-[10px] bg-background border px-1.5 py-0.5 rounded text-muted-foreground">{monthExpenses.length}</span>
                                     </div>
                                     <div className="text-right">
-                                        <p className="font-bold text-sm text-foreground">{formatEuro(monthTotalTtc)}</p>
+                                        <p className="font-bold text-sm text-foreground">{formatEuro(monthTotalHt)} HT</p>
                                     </div>
                                 </div>
 
@@ -118,7 +137,7 @@ export function ExpenseList() {
                                     <div className="bg-card border-t divide-y">
                                         {sortedCategories.map(category => {
                                             const catExpenses = groupedByCategory[category];
-                                            const catTotalTtc = catExpenses.reduce((sum, e) => sum + e.amountHt + e.tva, 0);
+                                            const catTotalHt = catExpenses.reduce((sum, e) => sum + e.amountHt, 0);
                                             const monthCatKey = `${monthKey}-${category}`;
                                             const isCatExpanded = expandedCategories[monthCatKey];
 
@@ -136,7 +155,7 @@ export function ExpenseList() {
                                                             <span className="text-[10px] ml-1 opacity-70">({catExpenses.length})</span>
                                                         </div>
                                                         <div className="text-right">
-                                                            <p className="font-semibold text-xs text-muted-foreground">{formatEuro(catTotalTtc)}</p>
+                                                            <p className="font-semibold text-xs text-muted-foreground">{formatEuro(catTotalHt)} HT</p>
                                                         </div>
                                                     </div>
 

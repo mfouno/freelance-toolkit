@@ -4,9 +4,12 @@ Un Dashboard complet et intelligent pensé sur-mesure pour les indépendants (EU
 
 ## 🌟 Fonctionnalités Principales
 
-- **Dashboard Intelligent :** Suivi automatique du CA, calcul de la trésorerie nette et intégration des prélèvements (TVA, Impôts, Cotisations SSI/URSSAF).
+- **Dashboard Intelligent :** Suivi automatique du CA (Jours + Ponctuel), calcul de la trésorerie nette et intégration des prélèvements (TVA, Impôts, Cotisations SSI/URSSAF).
 - **Gestion des Jours Travaillés :** Calendrier interactif pour pointer vos jours de travail (TJM) chez vos différents clients.
+- **CA Facturé Ponctuel :** Saisissez du chiffre d'affaires facturé hors TJM quotidien directement depuis le calendrier.
+- **Charges Annuelles Récurrentes :** Ajoutez vos charges fixes annuelles (loyer, électricité...) avec justificatifs PDF depuis iCloud, automatiquement intégrées au Dashboard et à l'historique.
 - **Notes de Frais Automatisées (OCR AI) :** Prenez en photo ou uploadez vos reçus. L'IA de Google (Gemini) extrait automatiquement : Marchand, Montant HT, TVA, Date, et catégorise la dépense.
+- **Simulateur Financier :** Projetez vos revenus nets, cotisations, impôts et trésorerie restante avec une barre de répartition visuelle du CA prévisionnel.
 - **Stockage Cloud Privé :** Les PDFs et Images de vos notes de frais sont sauvegardés secrètement dans votre Bucket Supabase.
 - **Synchronisation Temps Réel (PostgreSQL) :** Toutes les données (Clients, Dépenses...) sont stockées dans Supabase. Que vous soyez sur votre Mac ou votre iPhone, la donnée est la même.
 - **Application Mobile (PWA) :** Installez l'application sur l'écran d'accueil de votre smartphone. Mode hors ligne toléré et interface optimisée ("Safe Area" iOS).

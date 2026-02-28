@@ -9,7 +9,7 @@ export function SettingsSliders() {
     return (
         <Card className="mt-6">
             <CardHeader>
-                <CardTitle className="text-lg">Réglages EURL</CardTitle>
+                <CardTitle className="text-lg">Réglages</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
 

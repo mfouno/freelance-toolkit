@@ -1,6 +1,7 @@
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import { ExpenseAnalyzer } from "@/components/expenses/ExpenseAnalyzer";
 import { ExpenseList } from "@/components/expenses/ExpenseList";
+import { AnnualCharges } from "@/components/expenses/AnnualCharges";
 
 export default function ExpensesPage() {
     return (
@@ -13,6 +14,8 @@ export default function ExpensesPage() {
                     <p className="text-sm text-muted-foreground mb-4">Photographiez vos factures pour extraire les montants (via OCR local).</p>
                     <ExpenseAnalyzer />
                 </div>
+
+                <AnnualCharges />
 
                 <ExpenseList />
             </main>

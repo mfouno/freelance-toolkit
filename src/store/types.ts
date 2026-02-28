@@ -36,6 +36,14 @@ export interface EurlSettings {
     incomeTaxRate: number; // ex: 11 (%)
 }
 
+export interface AnnualCharge {
+    id: string;
+    label: string; // ex: "Loyer", "Électricité"
+    amountHt: number; // Montant annuel HT
+    year: number; // ex: 2025
+    documentUrl?: string; // URL du justificatif PDF
+}
+
 export interface AppState {
     clients: Client[];
     workDays: Record<string, WorkDay>; // Clé = "YYYY-MM-DD"
@@ -43,6 +51,7 @@ export interface AppState {
     settings: EurlSettings;
     salaries: Record<string, number>; // Clé = "YYYY-MM" (ex: "2024-03"), Valeur = montant net versé
     paidRevenues: Record<string, number>; // Clé = "YYYY-MM", Valeur = CA encaissé HT
+    oneOffRevenues: Record<string, number>; // Clé = "YYYY-MM", Valeur = CA facturé ponctuel HT
 
     // Actions Clients
     addClient: (client: Client) => void;
@@ -66,6 +75,14 @@ export interface AppState {
 
     // Actions Paid Revenues
     setPaidRevenue: (monthStr: string, amount: number) => void;
+
+    // Actions One-off Revenues
+    setOneOffRevenue: (monthStr: string, amount: number) => void;
+
+    // Annual Charges
+    annualCharges: AnnualCharge[];
+    addAnnualCharge: (charge: AnnualCharge) => void;
+    deleteAnnualCharge: (id: string) => void;
 
     // Supabase Sync
     initStore: () => Promise<void>;

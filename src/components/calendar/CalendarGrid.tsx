@@ -22,7 +22,7 @@ import { getFrenchHolidays, getHolidayInfo } from "@/lib/holidays";
 export function CalendarGrid() {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDates, setSelectedDates] = useState<Date[]>([]);
-    const { workDays, setWorkDay, removeWorkDay, salaries = {}, setSalary, paidRevenues = {}, setPaidRevenue } = useAppStore();
+    const { workDays, setWorkDay, removeWorkDay, salaries = {}, setSalary, paidRevenues = {}, setPaidRevenue, oneOffRevenues = {}, setOneOffRevenue } = useAppStore();
 
     const currentMonthStr = format(currentDate, "yyyy-MM");
 
@@ -35,6 +35,11 @@ export function CalendarGrid() {
     const currentMonthPaidRev = paidRevenues[currentMonthStr] || 0;
     const [isEditingPaidRev, setIsEditingPaidRev] = useState(false);
     const [paidRevInput, setPaidRevInput] = useState(currentMonthPaidRev);
+
+    // CA facturé ponctuel
+    const currentMonthOneOffRev = oneOffRevenues[currentMonthStr] || 0;
+    const [isEditingOneOffRev, setIsEditingOneOffRev] = useState(false);
+    const [oneOffRevInput, setOneOffRevInput] = useState(currentMonthOneOffRev);
 
     const [tjmInput, setTjmInput] = useState(650);
     const [clientInput, setClientInput] = useState("TF1");
@@ -129,10 +134,10 @@ export function CalendarGrid() {
                 </div>
 
                 <div className="flex flex-col gap-3">
-                    {/* Bandeau CA Payé */}
+                    {/* Bandeau CA encaissé */}
                     <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 flex items-center justify-between">
                         <div>
-                            <h4 className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">CA Payé ({format(currentDate, "MMM yy", { locale: fr })})</h4>
+                            <h4 className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">CA encaissé ({format(currentDate, "MMM yy", { locale: fr })})</h4>
                             <p className="text-xs text-muted-foreground mt-0.5">Montant HT réellement encaissé ce mois-ci.</p>
                         </div>
                         {isEditingPaidRev ? (
@@ -140,7 +145,7 @@ export function CalendarGrid() {
                                 <input
                                     autoFocus
                                     type="number"
-                                    value={paidRevInput}
+                                    value={paidRevInput || ""}
                                     onChange={(e) => setPaidRevInput(Number(e.target.value))}
                                     className="w-24 text-sm bg-background border rounded-md px-2 py-1 outline-none focus:ring-1 focus:ring-emerald-500"
                                 />
@@ -167,18 +172,56 @@ export function CalendarGrid() {
                         )}
                     </div>
 
+                    {/* Bandeau CA facturé ponctuel */}
+                    <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex items-center justify-between">
+                        <div>
+                            <h4 className="text-sm font-semibold text-amber-700 dark:text-amber-400">CA facturé ponctuel ({format(currentDate, "MMM yy", { locale: fr })})</h4>
+                            <p className="text-xs text-muted-foreground mt-0.5">Montant HT facturé (hors TJM quotidien) ce mois-ci.</p>
+                        </div>
+                        {isEditingOneOffRev ? (
+                            <div className="flex items-center space-x-2">
+                                <input
+                                    autoFocus
+                                    type="number"
+                                    value={oneOffRevInput || ""}
+                                    onChange={(e) => setOneOffRevInput(Number(e.target.value))}
+                                    className="w-24 text-sm bg-background border rounded-md px-2 py-1 outline-none focus:ring-1 focus:ring-amber-500"
+                                />
+                                <button
+                                    onClick={() => {
+                                        setOneOffRevenue(currentMonthStr, oneOffRevInput);
+                                        setIsEditingOneOffRev(false);
+                                    }}
+                                    className="bg-amber-500 text-white p-1.5 rounded-md hover:opacity-90"
+                                >
+                                    <Check className="h-4 w-4" />
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                                onClick={() => {
+                                    setOneOffRevInput(currentMonthOneOffRev);
+                                    setIsEditingOneOffRev(true);
+                                }}
+                                className="text-lg font-bold text-amber-700 dark:text-amber-400 hover:underline"
+                            >
+                                {currentMonthOneOffRev > 0 ? `${currentMonthOneOffRev} €` : "0 €"}
+                            </button>
+                        )}
+                    </div>
+
                     {/* Bandeau Salaire du Mois */}
                     <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex items-center justify-between">
                         <div>
                             <h4 className="text-sm font-semibold text-primary">Salaire versé ({format(currentDate, "MMM yy", { locale: fr })})</h4>
-                            <p className="text-xs text-muted-foreground mt-0.5">Montant net que vous vous êtes versé ce mois-ci.</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">Montant brut que vous vous êtes versé ce mois-ci.</p>
                         </div>
                         {isEditingSalary ? (
                             <div className="flex items-center space-x-2">
                                 <input
                                     autoFocus
                                     type="number"
-                                    value={salaryInput}
+                                    value={salaryInput || ""}
                                     onChange={(e) => setSalaryInput(Number(e.target.value))}
                                     className="w-24 text-sm bg-background border rounded-md px-2 py-1 outline-none focus:ring-1 focus:ring-primary"
                                 />

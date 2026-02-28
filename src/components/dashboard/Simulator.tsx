@@ -94,24 +94,24 @@ export function Simulator() {
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted rounded-xl">
-                    <div className="flex flex-col">
-                        <span className="text-xs text-muted-foreground">Salaire Brut Mensuel (Équiv.)</span>
+                    <div className="flex flex-col items-center text-center">
+                        <span className="text-xs text-muted-foreground line-clamp-2">Salaire Brut Mensuel</span>
                         <span className="text-xl font-bold">{formatEuro(monthlySalaryBrut)}</span>
                     </div>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col items-center text-center">
                         <span className="text-xs text-muted-foreground">Cotisations Annuelles</span>
                         <span className="text-xl font-bold text-orange-500 dark:text-orange-400">{formatEuro(cotisations)}</span>
                     </div>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col items-center text-center">
                         <span className="text-xs text-muted-foreground">Impôt (IR) Annuel</span>
                         <span className="text-xl font-bold text-red-500 dark:text-red-400">{formatEuro(impots)}</span>
                     </div>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col items-center text-center">
                         <span className="text-xs text-muted-foreground">Trésorerie Restante</span>
                         {tresorerie > 0 ? (
-                            <div>
+                            <div className="text-center">
                                 <span className="text-xl font-bold text-emerald-400">{formatEuro(tresorerie)}</span>
-                                <div className="flex items-center gap-2 mt-1 text-[10px] font-semibold">
+                                <div className="flex items-center gap-2 mt-1 text-[10px] font-semibold justify-center">
                                     <span className="text-emerald-600 dark:text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded">NET: {formatEuro(tresorerieNet)}</span>
                                     <span className="text-red-500 dark:text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded">FLAT: -{formatEuro(flatTax)}</span>
                                 </div>
@@ -148,6 +148,28 @@ export function Simulator() {
                                 );
                             })}
                         </div>
+
+                        {/* Accolade Net + Tréso */}
+                        {(annualSalaryNet + tresorerieNet) > 0 && (() => {
+                            const netTresoTotal = annualSalaryNet + tresorerieNet;
+                            const netTresoPercent = (netTresoTotal / distributionTotal) * 100;
+                            // Offset = tout ce qui n'est pas Net/Tréso (charges, cotis, IR, flat tax)
+                            const offsetPercent = 100 - netTresoPercent;
+                            return (
+                                <div className="relative mt-1 mb-2" style={{ marginLeft: `${offsetPercent}%`, width: `${netTresoPercent}%` }}>
+                                    {/* Brace top */}
+                                    <div className="flex items-start">
+                                        <div className="flex-1 border-l-2 border-b-2 border-emerald-500/60 h-3 rounded-bl-md" />
+                                        <div className="flex-1 border-r-2 border-b-2 border-emerald-500/60 h-3 rounded-br-md" />
+                                    </div>
+                                    {/* Label */}
+                                    <p className="text-center text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                                        {formatK(netTresoTotal)}€ ({((netTresoTotal / simulatedCA) * 100).toFixed(1)}% du CA)
+                                    </p>
+                                </div>
+                            );
+                        })()}
+
                         <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs justify-center mt-2">
                             {distData.map((d, i) => (
                                 <div key={`legend-${i}`} className="flex items-center gap-1.5">
