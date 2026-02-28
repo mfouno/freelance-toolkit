@@ -136,7 +136,7 @@ export function AnnualCharges() {
                                                     setEditingId(null);
                                                 }
                                             }}
-                                            className="w-20 text-sm bg-background border rounded-md px-2 py-1 outline-none focus:ring-1 focus:ring-primary"
+                                            className="w-20 text-base md:text-sm bg-background border rounded-md px-2 py-1 outline-none focus:ring-1 focus:ring-primary"
                                         />
                                         <button
                                             onClick={() => {
@@ -206,7 +206,7 @@ export function AnnualCharges() {
                         placeholder="Libellé (ex: Loyer bureau)"
                         value={label}
                         onChange={(e) => setLabel(e.target.value)}
-                        className="w-full text-sm bg-muted rounded-md px-3 py-2 outline-none focus:ring-1 focus:ring-primary"
+                        className="w-full text-base md:text-sm bg-muted rounded-md px-3 py-2 outline-none focus:ring-1 focus:ring-primary"
                     />
                     <div className="flex gap-2">
                         <input
@@ -214,7 +214,7 @@ export function AnnualCharges() {
                             placeholder="Montant annuel HT"
                             value={amount || ""}
                             onChange={(e) => setAmount(Number(e.target.value))}
-                            className="flex-1 text-sm bg-muted rounded-md px-3 py-2 outline-none focus:ring-1 focus:ring-primary"
+                            className="flex-1 text-base md:text-sm bg-muted rounded-md px-3 py-2 outline-none focus:ring-1 focus:ring-primary"
                         />
                         <button
                             onClick={handleAdd}

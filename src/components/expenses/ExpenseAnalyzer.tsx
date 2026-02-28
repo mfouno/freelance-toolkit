@@ -241,7 +241,7 @@ export function ExpenseAnalyzer() {
                                         type="month"
                                         value={month}
                                         onChange={e => setMonth(e.target.value)}
-                                        className="w-full mt-1 px-3 h-10 bg-muted text-black rounded-md text-sm border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                                        className="w-full mt-1 px-3 h-10 bg-muted text-black rounded-md text-base border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                                     />
                                 </div>
                                 <div>
@@ -249,7 +249,7 @@ export function ExpenseAnalyzer() {
                                     <select
                                         value={category}
                                         onChange={e => setCategory(e.target.value as ExpenseCategory)}
-                                        className="w-full mt-1 px-3 h-10 bg-muted text-black rounded-md text-sm border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                                        className="w-full mt-1 px-3 h-10 bg-muted text-black rounded-md text-base border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                                     >
                                         <option value="Restaurant / Repas">Restaurant / Repas</option>
                                         <option value="Transport (Train, Avion, Taxi)">Transport</option>
@@ -269,7 +269,7 @@ export function ExpenseAnalyzer() {
                                         type="text"
                                         value={clientName}
                                         onChange={e => setClientName(e.target.value)}
-                                        className="w-full mt-1 px-3 h-10 bg-muted text-black rounded-md text-sm border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                                        className="w-full mt-1 px-3 h-10 bg-muted text-black rounded-md text-base border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                                         placeholder="Nom du client"
                                     />
                                 </div>
@@ -279,7 +279,7 @@ export function ExpenseAnalyzer() {
                                         type="text"
                                         value={description}
                                         onChange={e => setDescription(e.target.value)}
-                                        className="w-full mt-1 px-3 h-10 bg-muted text-black rounded-md text-sm border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                                        className="w-full mt-1 px-3 h-10 bg-muted text-black rounded-md text-base border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                                         placeholder="Ex: Repas d'affaires, Train..."
                                     />
                                 </div>
@@ -294,7 +294,7 @@ export function ExpenseAnalyzer() {
                                     step="0.01"
                                     value={amountHt}
                                     onChange={e => setAmountHt(e.target.value === "" ? "" : Number(e.target.value))}
-                                    className="w-full mt-1 px-3 py-2 bg-muted text-black rounded-md text-sm border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                                    className="w-full mt-1 px-3 py-2 bg-muted text-black rounded-md text-base border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                                 />
                             </div>
                             <div>
@@ -304,7 +304,7 @@ export function ExpenseAnalyzer() {
                                     step="0.01"
                                     value={tva}
                                     onChange={e => setTva(e.target.value === "" ? "" : Number(e.target.value))}
-                                    className="w-full mt-1 px-3 py-2 bg-muted text-black rounded-md text-sm border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                                    className="w-full mt-1 px-3 py-2 bg-muted text-black rounded-md text-base border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                                 />
                             </div>
                         </div>
@@ -337,6 +337,7 @@ export function ExpenseAnalyzer() {
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 cursor-zoom-out"
                     onClick={() => setIsModalOpen(false)}
+                    style={{ touchAction: 'pinch-zoom' }}
                 >
                     <div className="relative max-h-[90vh] max-w-[90vw] flex items-center justify-center">
                         <img
