@@ -174,7 +174,7 @@ export function ExpenseAnalyzer() {
         }
 
         addExpense({
-            id: Date.now().toString(),
+            id: crypto.randomUUID(),
             date: expenseDate,
             description: description || "Facture",
             category: category,
