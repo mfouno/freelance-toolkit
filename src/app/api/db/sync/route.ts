@@ -1,10 +1,18 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase-admin';
+import { createClient } from '@supabase/supabase-js';
+import { unstable_noStore as noStore } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+    noStore();
     try {
+        const sb = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            { auth: { autoRefreshToken: false, persistSession: false } }
+        );
+
         const [
             clientsRes,
             workDaysRes,
@@ -15,41 +23,41 @@ export async function GET() {
             oneOffRevenuesRes,
             annualChargesRes
         ] = await Promise.all([
-            supabaseAdmin.from('clients').select('*'),
-            supabaseAdmin.from('work_days').select('*'),
-            supabaseAdmin.from('expenses').select('*'),
-            supabaseAdmin.from('settings').select('*').eq('id', 1).maybeSingle(),
-            supabaseAdmin.from('salaries').select('*'),
-            supabaseAdmin.from('paid_revenues').select('*'),
-            supabaseAdmin.from('one_off_revenues').select('*'),
-            supabaseAdmin.from('annual_charges').select('*')
+            sb.from('clients').select('*'),
+            sb.from('work_days').select('*'),
+            sb.from('expenses').select('*'),
+            sb.from('settings').select('*').eq('id', 1).maybeSingle(),
+            sb.from('salaries').select('*'),
+            sb.from('paid_revenues').select('*'),
+            sb.from('one_off_revenues').select('*'),
+            sb.from('annual_charges').select('*')
         ]);
 
-        const workDays = workDaysRes.data?.reduce((acc, wd) => {
+        const workDays = workDaysRes.data?.reduce((acc: any, wd: any) => {
             acc[wd.date] = { date: wd.date, clientId: wd.client_id, tjm: wd.tjm };
             return acc;
         }, {} as Record<string, any>) || {};
 
-        const salaries = salariesRes.data?.reduce((acc, s) => {
+        const salaries = salariesRes.data?.reduce((acc: any, s: any) => {
             acc[s.month_str] = s.amount;
             return acc;
         }, {} as Record<string, any>) || {};
 
-        const paidRevenues = paidRevenuesRes.data?.reduce((acc, pr) => {
+        const paidRevenues = paidRevenuesRes.data?.reduce((acc: any, pr: any) => {
             acc[pr.month_str] = pr.amount;
             return acc;
         }, {} as Record<string, any>) || {};
 
-        const oneOffRevenues = oneOffRevenuesRes.data?.reduce((acc, or) => {
+        const oneOffRevenues = oneOffRevenuesRes.data?.reduce((acc: any, or: any) => {
             acc[or.month_str] = or.amount;
             return acc;
         }, {} as Record<string, any>) || {};
 
-        const clients = clientsRes.data?.map(c => ({
+        const clients = clientsRes.data?.map((c: any) => ({
             id: c.id, name: c.name, defaultTjm: c.default_tjm
         })) || [];
 
-        const expenses = expensesRes.data?.map(e => ({
+        const expenses = expensesRes.data?.map((e: any) => ({
             id: e.id, date: e.date, description: e.description,
             amountHt: e.amount_ht, tva: e.tva, category: e.category,
             clientName: e.client_name, receiptUrl: e.receipt_url
@@ -60,7 +68,7 @@ export async function GET() {
             incomeTaxRate: settingsRes.data?.income_tax_rate || 11
         };
 
-        const annualCharges = annualChargesRes.data?.map(c => ({
+        const annualCharges = annualChargesRes.data?.map((c: any) => ({
             id: c.id, label: c.label, amountHt: c.amount_ht, year: c.year, documentUrl: c.document_url
         })) || [];
 
